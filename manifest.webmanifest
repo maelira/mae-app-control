@@ -1,0 +1,39 @@
+{
+  "name": "Mi Control de Salud",
+  "short_name": "Mi Salud",
+  "description": "Registro de glucemia, presión arterial y actividad física, con recordatorios para los controles.",
+  "lang": "es",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f8f9",
+  "theme_color": "#2a78d6",
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cargar glucemia",
+      "short_name": "Glucemia",
+      "url": "./?accion=registrar&tipo=glucosa",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Cargar presión",
+      "short_name": "Presión",
+      "url": "./?accion=registrar&tipo=presion",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Cargar ejercicio",
+      "short_name": "Ejercicio",
+      "url": "./?accion=registrar&tipo=ejercicio",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mi Control de Salud</title>
+  <meta name="description" content="Registro personal de glucemia, presión arterial y actividad física, con recordatorios para no olvidarte los controles.">
+  <meta name="theme-color" content="#2a78d6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./css/styles.css">
+
+  <!-- iOS: permite abrir la app a pantalla completa desde la pantalla de inicio -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mi Salud">
+</head>
+<body>
+  <a class="saltar" href="#vista">Saltar al contenido</a>
+
+  <header class="barra-superior">
+    <span class="marca">
+      <span class="marca-icono" aria-hidden="true">＋</span>
+      Mi Control de Salud
+    </span>
+    <a class="boton-icono barra-accion" href="#/ajustes" aria-label="Ajustes">⚙</a>
+  </header>
+
+  <div id="barra-instalar" class="barra-instalar" hidden>
+    <p>Instalá la app en tu teléfono para recibir los avisos y usarla sin internet.</p>
+    <div>
+      <button type="button" id="instalar" class="boton boton-primario boton-chico">Instalar</button>
+      <button type="button" id="cerrar-instalar" class="boton-icono" aria-label="Ahora no">✕</button>
+    </div>
+  </div>
+
+  <main id="vista" class="vista" tabindex="-1"></main>
+
+  <nav class="nav-inferior" aria-label="Secciones principales">
+    <a class="nav-item" href="#/inicio">
+      <span class="nav-icono" aria-hidden="true">🏠</span>
+      <span class="nav-texto">Inicio</span>
+    </a>
+    <a class="nav-item" href="#/glucosa">
+      <span class="nav-icono" aria-hidden="true">💧</span>
+      <span class="nav-texto">Glucosa</span>
+    </a>
+    <a class="nav-item" href="#/presion">
+      <span class="nav-icono" aria-hidden="true">❤️</span>
+      <span class="nav-texto">Presión</span>
+    </a>
+    <a class="nav-item" href="#/calendario">
+      <span class="nav-icono" aria-hidden="true">📅</span>
+      <span class="nav-texto">Calendario</span>
+    </a>
+    <a class="nav-item" href="#/recordatorios">
+      <span class="nav-icono" aria-hidden="true">🔔</span>
+      <span class="nav-texto">Avisos</span>
+    </a>
+  </nav>
+
+  <noscript>
+    <p style="padding:24px;text-align:center">
+      Esta aplicación necesita JavaScript activado para funcionar.
+    </p>
+  </noscript>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
