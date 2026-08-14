@@ -29,6 +29,10 @@ jobs:
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
+        with:
+          # Activa Pages en el repositorio si todavía no lo estaba,
+          # así no hace falta tocar nada a mano en los ajustes.
+          enablement: true
 
       - name: Subir los archivos de la app
         uses: actions/upload-pages-artifact@v3
