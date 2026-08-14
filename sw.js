@@ -1,6 +1,6 @@
 // Service worker: permite usar la app sin internet y mostrar las notificaciones.
 
-const VERSION = 'control-salud-v1';
+const VERSION = 'control-salud-v2';
 const RECURSOS = [
   './',
   './index.html',
@@ -16,6 +16,10 @@ const RECURSOS = [
   './js/views/glucosa.js',
   './js/views/presion.js',
   './js/views/ejercicio.js',
+  './js/views/medicamentos.js',
+  './js/views/comidas.js',
+  './js/views/sintomas.js',
+  './js/views/mas.js',
   './js/views/recordatorios.js',
   './js/views/ajustes.js',
   './icons/icon-192.png',
@@ -83,7 +87,12 @@ self.addEventListener('notificationclick', (evento) => {
   evento.notification.close();
 
   const tipo = evento.notification.data?.tipo;
-  const rutas = { glucosa: '#/glucosa', presion: '#/presion', ejercicio: '#/calendario' };
+  const rutas = {
+    glucosa: '#/glucosa',
+    presion: '#/presion',
+    ejercicio: '#/calendario',
+    medicamentos: '#/medicamentos',
+  };
   const ruta = rutas[tipo] || '#/inicio';
   const destino = new URL('./' + ruta, self.location.href).href;
 

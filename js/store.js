@@ -12,6 +12,9 @@ const ESTADO_INICIAL = {
   glucosa: [],
   presion: [],
   ejercicio: [],
+  medicamentos: [],
+  comidas: [],
+  sintomas: [],
   recordatorios: [
     { id: 'rec-glu-manana', tipo: 'glucosa', etiqueta: 'Glucemia en ayunas', hora: '07:30', dias: [1, 2, 3, 4, 5, 6, 0], activo: true },
     { id: 'rec-pre-noche', tipo: 'presion', etiqueta: 'Control de presión', hora: '20:00', dias: [1, 2, 3, 4, 5, 6, 0], activo: true },
@@ -59,6 +62,46 @@ export const INTENSIDADES = [
   { valor: 'intensa', etiqueta: 'Intensa' },
 ];
 
+/** Cómo se sintió después de tomar el medicamento. */
+export const SENSACIONES = [
+  { valor: '', etiqueta: 'Todavía no sé / no anoto' },
+  { valor: 'bien', etiqueta: 'Me sentí bien', nivel: 'bien' },
+  { valor: 'igual', etiqueta: 'Sin cambios', nivel: '' },
+  { valor: 'molestias', etiqueta: 'Me cayó mal / tuve molestias', nivel: 'atencion' },
+];
+
+export const TIPOS_COMIDA = [
+  { valor: 'desayuno', etiqueta: 'Desayuno' },
+  { valor: 'media-manana', etiqueta: 'Media mañana' },
+  { valor: 'almuerzo', etiqueta: 'Almuerzo' },
+  { valor: 'merienda', etiqueta: 'Merienda' },
+  { valor: 'cena', etiqueta: 'Cena' },
+  { valor: 'colacion', etiqueta: 'Colación / picoteo' },
+];
+
+export const SINTOMAS_COMUNES = [
+  'Mareo', 'Cansancio', 'Náuseas', 'Vómitos', 'Dolor de cabeza',
+  'Visión borrosa', 'Temblores', 'Sudoración fría', 'Palpitaciones',
+  'Falta de aire', 'Dolor de pecho', 'Hormigueo', 'Calambres',
+  'Mucha sed', 'Orinar seguido', 'Somnolencia', 'Confusión', 'Dolor de estómago',
+];
+
+/**
+ * Síntomas ante los que conviene buscar atención médica sin esperar.
+ * No es un diagnóstico: sólo un recordatorio de no dejarlos pasar.
+ */
+export const SINTOMAS_DE_ALARMA = ['Dolor de pecho', 'Falta de aire', 'Confusión', 'Vómitos'];
+
+/** Síntomas que suelen justificar medirse la glucemia o la presión en el momento. */
+export const SINTOMAS_MEDIR_GLUCOSA = ['Temblores', 'Sudoración fría', 'Mucha sed', 'Orinar seguido', 'Confusión', 'Somnolencia', 'Visión borrosa'];
+export const SINTOMAS_MEDIR_PRESION = ['Mareo', 'Dolor de cabeza', 'Palpitaciones', 'Visión borrosa', 'Falta de aire'];
+
+export const INTENSIDADES_SINTOMA = [
+  { valor: 'leve', etiqueta: 'Leve', nivel: '' },
+  { valor: 'moderado', etiqueta: 'Moderado', nivel: 'atencion' },
+  { valor: 'fuerte', etiqueta: 'Fuerte', nivel: 'serio' },
+];
+
 let estado = cargar();
 const suscriptores = new Set();
 
@@ -89,6 +132,10 @@ function migrar(datos) {
     glucosa: Array.isArray(datos.glucosa) ? datos.glucosa : [],
     presion: Array.isArray(datos.presion) ? datos.presion : [],
     ejercicio: Array.isArray(datos.ejercicio) ? datos.ejercicio : [],
+    // Colecciones agregadas después: en copias viejas no existen.
+    medicamentos: Array.isArray(datos.medicamentos) ? datos.medicamentos : [],
+    comidas: Array.isArray(datos.comidas) ? datos.comidas : [],
+    sintomas: Array.isArray(datos.sintomas) ? datos.sintomas : [],
     recordatorios: Array.isArray(datos.recordatorios) ? datos.recordatorios : base.recordatorios,
     ajustes: {
       ...base.ajustes,
@@ -124,7 +171,7 @@ export function suscribir(fn) {
 
 // --- Registros -------------------------------------------------------------
 
-const COLECCIONES = ['glucosa', 'presion', 'ejercicio'];
+export const COLECCIONES = ['glucosa', 'presion', 'ejercicio', 'medicamentos', 'comidas', 'sintomas'];
 
 /** Agrega un registro y devuelve el objeto creado (ordena por fecha descendente). */
 export function agregar(coleccion, datos) {
@@ -153,29 +200,38 @@ export function ultimos(coleccion, dias) {
   return estado[coleccion].filter((r) => r.ts >= desde);
 }
 
-/** Todos los registros (de los tres tipos) de un día concreto. */
+/** Todos los registros de un día concreto, agrupados por tipo. */
 export function registrosDelDia(clave) {
-  const filtrar = (col) => estado[col].filter((r) => claveDia(r.ts) === clave);
-  return {
-    glucosa: filtrar('glucosa'),
-    presion: filtrar('presion'),
-    ejercicio: filtrar('ejercicio'),
-  };
+  const resultado = {};
+  for (const col of COLECCIONES) {
+    resultado[col] = estado[col].filter((r) => claveDia(r.ts) === clave);
+  }
+  return resultado;
 }
 
-/** Mapa "YYYY-MM-DD" -> {glucosa:n, presion:n, ejercicio:n} para pintar el calendario. */
+/** Mapa "YYYY-MM-DD" -> cuántos registros de cada tipo, para pintar el calendario. */
 export function resumenPorDia(desde, hasta) {
   const mapa = {};
-  const anotar = (col) => {
+  const vacio = () => Object.fromEntries(COLECCIONES.map((c) => [c, 0]));
+  for (const col of COLECCIONES) {
     for (const r of estado[col]) {
       if (r.ts < desde || r.ts > hasta) continue;
       const c = claveDia(r.ts);
-      mapa[c] ??= { glucosa: 0, presion: 0, ejercicio: 0 };
+      mapa[c] ??= vacio();
       mapa[c][col] += 1;
     }
-  };
-  COLECCIONES.forEach(anotar);
+  }
   return mapa;
+}
+
+/** Nombres de medicamentos ya usados, para sugerirlos al cargar uno nuevo. */
+export function medicamentosUsados() {
+  const vistos = new Map();
+  for (const r of estado.medicamentos) {
+    const clave = r.nombre.trim().toLowerCase();
+    if (!vistos.has(clave)) vistos.set(clave, { nombre: r.nombre.trim(), dosis: r.dosis || '' });
+  }
+  return [...vistos.values()];
 }
 
 // --- Recordatorios ---------------------------------------------------------

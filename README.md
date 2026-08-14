@@ -1,8 +1,9 @@
 # Mi Control de Salud
 
 Aplicación móvil personal para registrar los resultados del **glucómetro** y del
-**tensiómetro**, anotar la **actividad física en un calendario** y recibir
-**avisos y notificaciones** para no olvidarse los controles.
+**tensiómetro**, la **medicación**, las **comidas**, los **síntomas del día** y la
+**actividad física en un calendario**, con **avisos y notificaciones** para no
+olvidarse los controles.
 
 Funciona sin internet, se instala en la pantalla de inicio del celular como
 cualquier otra app y guarda todo **dentro del propio teléfono**: ningún dato de
@@ -65,18 +66,48 @@ Entrá a la pestaña **Avisos** y tocá **Activar notificaciones**. Después us�
   **crisis hipertensiva** (que dispara una alerta).
 - Promedios de la semana y gráfico con las dos curvas (sistólica y diastólica).
 
+### 💊 Medicamentos
+- Cada toma queda registrada con **qué tomaste, la dosis, el día y la hora**.
+- Campo para anotar **cómo te sentiste después** (bien, sin cambios, con molestias).
+  Si en el momento no sabés, la app te muestra las tomas de las últimas 24 horas
+  para que lo completes con un toque cuando puedas.
+- Los medicamentos que ya usaste aparecen como botones: repetir una toma es un toque.
+- Contador de cuántas veces te cayó mal en el último mes — dato concreto para la consulta.
+- Podés programar **recordatorios de medicación** (ver más abajo).
+
+### 🍽️ Comidas
+- Registro de desayuno, media mañana, almuerzo, merienda, cena y colaciones.
+- Se propone sola la comida según la hora del día.
+- Campo libre para describir qué comiste, más notas.
+- En el calendario, las comidas quedan junto a las glucemias del mismo día: así se
+  ve qué comiste antes de un valor alto.
+
+### 🩺 Síntomas y eventos
+- Lista de síntomas frecuentes (mareo, cansancio, náuseas, vómitos, dolor de cabeza,
+  visión borrosa, temblores, palpitaciones y más) y podés elegir varios a la vez.
+- Campo "Otro" para escribir cualquier cosa con tus palabras.
+- Intensidad (leve, moderado, fuerte), duración y notas.
+- **Ante síntomas que no conviene dejar pasar** (dolor de pecho, falta de aire,
+  confusión, vómitos) la app te recuerda consultar. No diagnostica nada: sólo evita
+  que quede anotado y olvidado.
+- Cuando el síntoma lo justifica, te ofrece un atajo para **medirte la glucemia o la
+  presión en ese momento**, así el valor queda junto al síntoma.
+- Ranking de lo más repetido del mes, para mostrarle al médico.
+
 ### 📅 Calendario y ejercicio
 - Calendario mensual: cada día muestra puntos de color según lo registrado
-  (glucemia, presión, ejercicio).
+  (glucemia, presión, ejercicio) y un triángulo ▲ si ese día anotaste síntomas.
+  La medicación y las comidas no llevan marca propia porque se registran todos los
+  días: un punto en las 31 casillas no diría nada. Se ven al tocar el día.
 - Se toca un día y se carga **a qué hora** se hizo ejercicio, **qué fue**
   (caminata, bici, natación, gimnasio… o lo que escribas), cuántos minutos y con
   qué intensidad.
-- Al elegir un día se ve todo lo registrado en esa fecha: actividad, glucemias y
-  presión juntas.
+- Al elegir un día se ve **todo** lo registrado en esa fecha: actividad, glucemias,
+  presión, medicación, comidas y síntomas, uno debajo del otro.
 - Resumen del mes: sesiones, minutos totales y días activos.
 
 ### 🔔 Recordatorios
-- Avisos configurables por tipo de control (glucómetro, tensiómetro, ejercicio),
+- Avisos configurables por tipo (glucómetro, tensiómetro, **medicamento**, ejercicio),
   con nombre propio, hora y días de la semana.
 - Vienen dos cargados de fábrica: glucemia a las 07:30 y presión a las 20:00,
   todos los días. Se pueden editar, pausar o borrar.
@@ -86,8 +117,9 @@ Entrá a la pestaña **Avisos** y tocá **Activar notificaciones**. Después us�
 ### ⚙️ Ajustes
 - Tu nombre, unidad de glucemia (mg/dL o mmol/L) y sonido de los avisos.
 - Tus objetivos de glucemia (los que te haya indicado tu médico).
-- **Exportar a CSV** las glucemias, la presión o el ejercicio, para imprimir o
-  abrir en Excel y llevar a la consulta.
+- **Exportar a CSV** cualquiera de los seis registros (glucemias, presión,
+  medicamentos, comidas, síntomas y ejercicio), para imprimir o abrir en Excel
+  y llevar a la consulta.
 - **Copia de seguridad** en un archivo, y restauración desde ese archivo.
 
 ---
@@ -139,7 +171,8 @@ js/notify.js             Motor de recordatorios y alertas
 js/charts.js             Gráficos de tendencia en SVG
 js/componentes.js        Piezas de interfaz reutilizadas
 js/utils.js              Fechas, formato y exportación
-js/views/                Una pantalla por archivo
+js/views/                Una pantalla por archivo (glucosa, presión, ejercicio,
+                         medicamentos, comidas, síntomas, recordatorios, ajustes)
 icons/                   Íconos de la app
 ```
 
@@ -151,6 +184,7 @@ No usa librerías externas ni requiere compilación: son archivos estáticos.
 
 Esta aplicación sirve para **llevar un registro ordenado** de tus controles.
 No es un producto médico, no realiza diagnósticos y no debe usarse para decidir
-tratamientos ni dosis de medicación. Las clasificaciones de glucemia y presión
-son orientativas. Ante cualquier valor que te preocupe, consultá a un
-profesional de la salud.
+tratamientos ni dosis de medicación. Las clasificaciones de glucemia y presión,
+y los avisos ante ciertos síntomas, son orientativos. Nunca cambies ni suspendas
+un medicamento por tu cuenta. Ante cualquier valor o síntoma que te preocupe,
+consultá a un profesional de la salud.

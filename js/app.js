@@ -4,6 +4,10 @@ import * as inicio from './views/inicio.js';
 import * as glucosa from './views/glucosa.js';
 import * as presion from './views/presion.js';
 import * as ejercicio from './views/ejercicio.js';
+import * as medicamentos from './views/medicamentos.js';
+import * as comidas from './views/comidas.js';
+import * as sintomas from './views/sintomas.js';
+import * as mas from './views/mas.js';
 import * as recordatorios from './views/recordatorios.js';
 import * as ajustes from './views/ajustes.js';
 import * as notify from './notify.js';
@@ -14,8 +18,12 @@ const RUTAS = {
   '/glucosa': { vista: glucosa, titulo: 'Glucómetro' },
   '/presion': { vista: presion, titulo: 'Tensiómetro' },
   '/calendario': { vista: ejercicio, titulo: 'Calendario' },
-  '/recordatorios': { vista: recordatorios, titulo: 'Recordatorios' },
-  '/ajustes': { vista: ajustes, titulo: 'Ajustes' },
+  '/medicamentos': { vista: medicamentos, titulo: 'Medicamentos', menu: '/mas' },
+  '/comidas': { vista: comidas, titulo: 'Comidas', menu: '/mas' },
+  '/sintomas': { vista: sintomas, titulo: 'Síntomas y eventos', menu: '/mas' },
+  '/mas': { vista: mas, titulo: 'Más' },
+  '/recordatorios': { vista: recordatorios, titulo: 'Recordatorios', menu: '/mas' },
+  '/ajustes': { vista: ajustes, titulo: 'Ajustes', menu: '/mas' },
 };
 
 const RUTA_POR_DEFECTO = '/inicio';
@@ -28,15 +36,17 @@ function rutaActual() {
 
 function navegar() {
   const ruta = rutaActual();
-  const { vista, titulo } = RUTAS[ruta];
+  const { vista, titulo, menu } = RUTAS[ruta];
 
   document.title = `${titulo} · Mi Control de Salud`;
   contenedor.innerHTML = '';
   vista.render(contenedor);
   window.scrollTo({ top: 0 });
 
+  // Las secciones que viven dentro de "Más" mantienen esa pestaña marcada.
+  const pestana = menu || ruta;
   document.querySelectorAll('.nav-item').forEach((enlace) => {
-    const activo = enlace.getAttribute('href') === `#${ruta}`;
+    const activo = enlace.getAttribute('href') === `#${pestana}`;
     enlace.classList.toggle('activo', activo);
     if (activo) enlace.setAttribute('aria-current', 'page');
     else enlace.removeAttribute('aria-current');
@@ -47,7 +57,14 @@ function navegar() {
 function rutaDesdeNotificacion() {
   const params = new URLSearchParams(location.search);
   if (params.get('accion') !== 'registrar') return;
-  const destinos = { glucosa: '/glucosa', presion: '/presion', ejercicio: '/calendario' };
+  const destinos = {
+    glucosa: '/glucosa',
+    presion: '/presion',
+    ejercicio: '/calendario',
+    medicamentos: '/medicamentos',
+    comidas: '/comidas',
+    sintomas: '/sintomas',
+  };
   const destino = destinos[params.get('tipo')];
   if (destino) location.hash = destino;
   // Limpiamos la URL para que al recargar no vuelva a saltar.

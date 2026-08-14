@@ -3,7 +3,8 @@
 
 import * as store from '../store.js';
 import {
-  fichaEjercicio, fichaGlucosa, fichaPresion, conectarBorrado, aviso, tarjetaDato,
+  fichaEjercicio, fichaGlucosa, fichaPresion, fichaMedicamento, fichaComida, fichaSintoma,
+  conectarBorrado, aviso, tarjetaDato,
 } from '../componentes.js';
 import {
   claveDia, claveHora, fechaDesdePartes, fmtFechaLarga, MESES, esc,
@@ -42,18 +43,30 @@ export function render(host) {
   for (let i = 0; i < desplazamiento; i++) celdas.push('<div class="celda vacia"></div>');
   for (let dia = 1; dia <= diasEnMes; dia++) {
     const clave = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-    const cuentas = resumen[clave] || { glucosa: 0, presion: 0, ejercicio: 0 };
+    const cuentas = resumen[clave] || {};
+    // Sólo se marcan los tipos que dan señal al verlos en el mes.
+    // Medicación y comidas se registran todos los días: un punto diario no informaría nada.
     const puntos = [
       cuentas.glucosa ? '<i class="punto punto-glucosa"></i>' : '',
       cuentas.presion ? '<i class="punto punto-presion"></i>' : '',
       cuentas.ejercicio ? '<i class="punto punto-ejercicio"></i>' : '',
+      // Los síntomas usan forma propia (triángulo), no un color más.
+      cuentas.sintomas ? '<i class="marca-sintoma" aria-hidden="true">▲</i>' : '',
     ].join('');
+
+    const descripcion = [
+      cuentas.glucosa ? 'glucemia' : '',
+      cuentas.presion ? 'presión' : '',
+      cuentas.ejercicio ? 'ejercicio' : '',
+      cuentas.sintomas ? 'síntomas' : '',
+    ].filter(Boolean).join(', ');
+
     const clases = ['celda'];
     if (clave === hoy) clases.push('es-hoy');
     if (clave === diaSeleccionado) clases.push('seleccionada');
     celdas.push(`
       <button type="button" class="${clases.join(' ')}" data-dia="${clave}"
-              aria-label="${dia} de ${MESES[mes]}${cuentas.ejercicio ? ', con actividad física' : ''}"
+              aria-label="${dia} de ${MESES[mes]}${descripcion ? ', con ' + descripcion : ''}"
               ${clave === diaSeleccionado ? 'aria-current="date"' : ''}>
         <span class="numero">${dia}</span>
         <span class="puntos">${puntos}</span>
@@ -87,7 +100,9 @@ export function render(host) {
         <span><i class="punto punto-glucosa"></i>Glucemia</span>
         <span><i class="punto punto-presion"></i>Presión</span>
         <span><i class="punto punto-ejercicio"></i>Ejercicio</span>
+        <span><i class="marca-sintoma" aria-hidden="true">▲</i>Síntomas</span>
       </div>
+      <p class="ayuda ayuda-calendario">Tocá cualquier día para ver todo lo que registraste: también medicación y comidas.</p>
       <button type="button" class="boton boton-suave" id="ir-hoy">Ir a hoy</button>
     </section>
 
@@ -193,19 +208,23 @@ function horasBonitas(minutos) {
   return m ? `${h} h ${m} min` : `${h} h`;
 }
 
-function listaDelDia({ glucosa, presion, ejercicio }) {
-  const bloques = [];
-  if (ejercicio.length) {
-    bloques.push(`<ul class="lista-fichas">${[...ejercicio].sort((a, b) => a.ts - b.ts).map(fichaEjercicio).join('')}</ul>`);
-  }
-  if (glucosa.length) {
-    bloques.push(`<h4 class="mini-titulo">Glucemia</h4><ul class="lista-fichas">${[...glucosa].sort((a, b) => a.ts - b.ts).map(fichaGlucosa).join('')}</ul>`);
-  }
-  if (presion.length) {
-    bloques.push(`<h4 class="mini-titulo">Presión</h4><ul class="lista-fichas">${[...presion].sort((a, b) => a.ts - b.ts).map(fichaPresion).join('')}</ul>`);
-  }
+function listaDelDia(delDia) {
+  const bloques = [
+    { titulo: null, registros: delDia.ejercicio, pintar: fichaEjercicio },
+    { titulo: 'Glucemia', registros: delDia.glucosa, pintar: fichaGlucosa },
+    { titulo: 'Presión', registros: delDia.presion, pintar: fichaPresion },
+    { titulo: 'Medicamentos', registros: delDia.medicamentos, pintar: fichaMedicamento },
+    { titulo: 'Comidas', registros: delDia.comidas, pintar: fichaComida },
+    { titulo: 'Síntomas y eventos', registros: delDia.sintomas, pintar: fichaSintoma },
+  ].filter((b) => b.registros.length);
+
   if (!bloques.length) return '<p class="vacio">No hay nada registrado en este día.</p>';
-  return bloques.join('');
+
+  return bloques.map(({ titulo, registros, pintar }) => `
+    ${titulo ? `<h4 class="mini-titulo">${titulo}</h4>` : ''}
+    <ul class="lista-fichas">
+      ${[...registros].sort((a, b) => a.ts - b.ts).map(pintar).join('')}
+    </ul>`).join('');
 }
 
 function guardar(datos, host) {

@@ -77,9 +77,12 @@ export function render(host) {
       <h2 class="tarjeta-encabezado">Llevar los datos al médico</h2>
       <p class="ayuda">Descargá tus registros para imprimirlos o abrirlos en una planilla.</p>
       <div class="botonera">
-        <button type="button" class="boton boton-suave" data-exportar="glucosa">Glucemias (CSV)</button>
-        <button type="button" class="boton boton-suave" data-exportar="presion">Presión (CSV)</button>
-        <button type="button" class="boton boton-suave" data-exportar="ejercicio">Ejercicio (CSV)</button>
+        <button type="button" class="boton boton-suave" data-exportar="glucosa">Glucemias</button>
+        <button type="button" class="boton boton-suave" data-exportar="presion">Presión</button>
+        <button type="button" class="boton boton-suave" data-exportar="medicamentos">Medicamentos</button>
+        <button type="button" class="boton boton-suave" data-exportar="comidas">Comidas</button>
+        <button type="button" class="boton boton-suave" data-exportar="sintomas">Síntomas</button>
+        <button type="button" class="boton boton-suave" data-exportar="ejercicio">Ejercicio</button>
       </div>
     </section>
 
@@ -94,7 +97,9 @@ export function render(host) {
         </label>
       </div>
       <div class="conteo-registros">
-        ${estado.glucosa.length} glucemias · ${estado.presion.length} mediciones de presión · ${estado.ejercicio.length} actividades
+        ${estado.glucosa.length} glucemias · ${estado.presion.length} mediciones de presión ·
+        ${estado.medicamentos.length} tomas · ${estado.comidas.length} comidas ·
+        ${estado.sintomas.length} síntomas · ${estado.ejercicio.length} actividades
       </div>
     </section>
 
@@ -205,12 +210,33 @@ function exportar(coleccion) {
       fmtFecha(r.ts), fmtHora(r.ts), r.sistolica, r.diastolica, r.pulso ?? '', r.brazo || '',
       store.clasificarPresion(r.sistolica, r.diastolica).etiqueta, r.notas || '',
     ]);
+  } else if (coleccion === 'medicamentos') {
+    cabeceras = ['Fecha', 'Hora', 'Medicamento', 'Dosis', 'Cómo me sentí', 'Notas'];
+    filas = registros.map((r) => {
+      const sensacion = store.SENSACIONES.find((s) => s.valor === r.sensacion);
+      return [fmtFecha(r.ts), fmtHora(r.ts), r.nombre, r.dosis || '', r.sensacion ? sensacion?.etiqueta || '' : '', r.notas || ''];
+    });
+  } else if (coleccion === 'comidas') {
+    cabeceras = ['Fecha', 'Hora', 'Comida', 'Qué comí', 'Notas'];
+    filas = registros.map((r) => {
+      const tipo = store.TIPOS_COMIDA.find((t) => t.valor === r.tipo);
+      return [fmtFecha(r.ts), fmtHora(r.ts), tipo?.etiqueta || '', r.descripcion || '', r.notas || ''];
+    });
+  } else if (coleccion === 'sintomas') {
+    cabeceras = ['Fecha', 'Hora', 'Síntomas', 'Intensidad', 'Duración', 'Notas'];
+    filas = registros.map((r) => {
+      const intensidad = store.INTENSIDADES_SINTOMA.find((i) => i.valor === r.intensidad);
+      return [fmtFecha(r.ts), fmtHora(r.ts), (r.tipos || []).join(', '), intensidad?.etiqueta || '', r.duracion || '', r.notas || ''];
+    });
   } else {
     cabeceras = ['Fecha', 'Hora', 'Actividad', 'Duración (min)', 'Intensidad', 'Notas'];
     filas = registros.map((r) => [fmtFecha(r.ts), fmtHora(r.ts), r.tipo, r.duracion ?? '', r.intensidad || '', r.notas || '']);
   }
 
-  const nombres = { glucosa: 'glucemias', presion: 'presion-arterial', ejercicio: 'ejercicio' };
+  const nombres = {
+    glucosa: 'glucemias', presion: 'presion-arterial', ejercicio: 'ejercicio',
+    medicamentos: 'medicamentos', comidas: 'comidas', sintomas: 'sintomas',
+  };
   // BOM para que Excel abra los acentos correctamente.
   descargar(`${nombres[coleccion]}-${claveDia()}.csv`, '﻿' + aCSV(cabeceras, filas), 'text/csv;charset=utf-8');
   aviso('Archivo descargado');

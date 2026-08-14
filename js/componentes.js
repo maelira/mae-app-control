@@ -6,8 +6,9 @@ import * as store from './store.js';
 /** Etiqueta de color según el nivel clínico: bien | atencion | serio | critico. */
 export function insignia(clasificacion) {
   const iconos = { bien: '✓', atencion: '!', serio: '▲', critico: '⚠' };
+  const icono = iconos[clasificacion.nivel];
   return `<span class="insignia nivel-${esc(clasificacion.nivel)}">
-    <i aria-hidden="true">${iconos[clasificacion.nivel] || ''}</i>${esc(clasificacion.etiqueta)}
+    ${icono ? `<i aria-hidden="true">${icono}</i>` : ''}${esc(clasificacion.etiqueta)}
   </span>`;
 }
 
@@ -104,6 +105,58 @@ export function fichaEjercicio(registro) {
     meta: partes.join(' · '),
     notas: registro.notas,
     estado: '<span class="insignia nivel-ejercicio"><i aria-hidden="true">🏃</i>Actividad</span>',
+  });
+}
+
+/** Ficha de una toma de medicamento. */
+export function fichaMedicamento(registro) {
+  const sensacion = store.SENSACIONES.find((s) => s.valor === registro.sensacion);
+  const estado = sensacion && sensacion.valor
+    ? insignia({ nivel: sensacion.nivel || 'neutro', etiqueta: sensacion.etiqueta })
+    : '<span class="insignia nivel-medicamento"><i aria-hidden="true">💊</i>Tomado</span>';
+  return ficha({
+    coleccion: 'medicamentos',
+    id: registro.id,
+    ts: registro.ts,
+    valor: registro.nombre,
+    valorTexto: true,
+    meta: registro.dosis || '',
+    notas: registro.notas,
+    estado,
+  });
+}
+
+/** Ficha de una comida. */
+export function fichaComida(registro) {
+  const tipo = store.TIPOS_COMIDA.find((t) => t.valor === registro.tipo);
+  return ficha({
+    coleccion: 'comidas',
+    id: registro.id,
+    ts: registro.ts,
+    valor: tipo?.etiqueta || 'Comida',
+    valorTexto: true,
+    meta: registro.descripcion || '',
+    notas: registro.notas,
+    estado: '<span class="insignia nivel-comida"><i aria-hidden="true">🍽️</i>Comida</span>',
+  });
+}
+
+/** Ficha de un síntoma o evento del día. */
+export function fichaSintoma(registro) {
+  const lista = Array.isArray(registro.tipos) ? registro.tipos : [registro.tipos].filter(Boolean);
+  const intensidad = store.INTENSIDADES_SINTOMA.find((i) => i.valor === registro.intensidad);
+  const estado = intensidad
+    ? insignia({ nivel: intensidad.nivel || 'neutro', etiqueta: intensidad.etiqueta })
+    : '<span class="insignia nivel-sintoma"><i aria-hidden="true">▲</i>Registrado</span>';
+  return ficha({
+    coleccion: 'sintomas',
+    id: registro.id,
+    ts: registro.ts,
+    valor: lista.join(', ') || 'Sin especificar',
+    valorTexto: true,
+    meta: registro.duracion ? `Duró ${registro.duracion}` : '',
+    notas: registro.notas,
+    estado,
   });
 }
 

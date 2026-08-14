@@ -11,6 +11,7 @@ const ORDEN_DIAS = [1, 2, 3, 4, 5, 6, 0];
 const ETIQUETAS_TIPO = {
   glucosa: { nombre: 'Glucómetro', icono: '💧' },
   presion: { nombre: 'Tensiómetro', icono: '❤️' },
+  medicamentos: { nombre: 'Medicamento', icono: '💊' },
   ejercicio: { nombre: 'Ejercicio', icono: '🏃' },
 };
 

@@ -3,7 +3,9 @@
 import * as store from '../store.js';
 import * as notify from '../notify.js';
 import { graficoLineas, activarGraficos } from '../charts.js';
-import { tarjetaDato, fichaEjercicio } from '../componentes.js';
+import {
+  tarjetaDato, fichaEjercicio, fichaMedicamento, fichaComida, fichaSintoma,
+} from '../componentes.js';
 import { claveDia, fmtFechaLarga, fmtHora, esc, promedio } from '../utils.js';
 
 export function render(host) {
@@ -38,17 +40,29 @@ export function render(host) {
     ${pendientes.length ? bloquePendientes(pendientes) : ''}
 
     <section class="accesos">
-      <a class="acceso acceso-glucosa" href="#/glucosa">
+      <a class="acceso" href="#/glucosa">
         <span class="acceso-icono" aria-hidden="true">💧</span>
-        <span class="acceso-texto">Cargar<br>glucemia</span>
+        <span class="acceso-texto">Glucemia</span>
       </a>
-      <a class="acceso acceso-presion" href="#/presion">
+      <a class="acceso" href="#/presion">
         <span class="acceso-icono" aria-hidden="true">❤️</span>
-        <span class="acceso-texto">Cargar<br>presión</span>
+        <span class="acceso-texto">Presión</span>
       </a>
-      <a class="acceso acceso-ejercicio" href="#/calendario">
+      <a class="acceso" href="#/medicamentos">
+        <span class="acceso-icono" aria-hidden="true">💊</span>
+        <span class="acceso-texto">Medicación</span>
+      </a>
+      <a class="acceso" href="#/comidas">
+        <span class="acceso-icono" aria-hidden="true">🍽️</span>
+        <span class="acceso-texto">Comida</span>
+      </a>
+      <a class="acceso" href="#/sintomas">
+        <span class="acceso-icono" aria-hidden="true">🩺</span>
+        <span class="acceso-texto">Síntoma</span>
+      </a>
+      <a class="acceso" href="#/calendario">
         <span class="acceso-icono" aria-hidden="true">🏃</span>
-        <span class="acceso-texto">Cargar<br>ejercicio</span>
+        <span class="acceso-texto">Ejercicio</span>
       </a>
     </section>
 
@@ -76,9 +90,11 @@ export function render(host) {
           pie: `${store.ultimos('ejercicio', 7).length} sesion${store.ultimos('ejercicio', 7).length === 1 ? '' : 'es'}`,
         })}
         ${tarjetaDato({
-          titulo: 'Controles de hoy',
-          valor: delDia.glucosa.length + delDia.presion.length,
-          pie: `${delDia.glucosa.length} glucemia · ${delDia.presion.length} presión`,
+          titulo: 'Medicación de hoy',
+          valor: delDia.medicamentos.length,
+          pie: delDia.medicamentos.length
+            ? delDia.medicamentos.map((r) => fmtHora(r.ts)).join(' · ')
+            : 'Sin tomas registradas',
         })}
       </div>
     </section>
@@ -126,11 +142,7 @@ export function render(host) {
         })}
       </section>` : ''}
 
-    ${delDia.ejercicio.length ? `
-      <section class="tarjeta">
-        <h2 class="tarjeta-encabezado">Actividad de hoy</h2>
-        <ul class="lista-fichas">${[...delDia.ejercicio].sort((a, b) => a.ts - b.ts).map(fichaEjercicio).join('')}</ul>
-      </section>` : ''}
+    ${bloqueDeHoy(delDia)}
 
     <p class="nota-legal">Esta app te ayuda a llevar un registro ordenado. No da diagnósticos ni reemplaza el control de tu médico.</p>
   `;
@@ -155,16 +167,39 @@ function promedioTexto() {
   return media != null ? `${store.mostrarGlucosa(media)} ${store.unidadGlucosa()}` : 'sin datos';
 }
 
+/** Todo lo registrado hoy, en una sola línea de tiempo. */
+function bloqueDeHoy(delDia) {
+  const filas = [
+    ...delDia.ejercicio.map((r) => ({ ts: r.ts, html: fichaEjercicio(r) })),
+    ...delDia.medicamentos.map((r) => ({ ts: r.ts, html: fichaMedicamento(r) })),
+    ...delDia.comidas.map((r) => ({ ts: r.ts, html: fichaComida(r) })),
+    ...delDia.sintomas.map((r) => ({ ts: r.ts, html: fichaSintoma(r) })),
+  ].sort((a, b) => a.ts - b.ts);
+
+  if (!filas.length) return '';
+  return `<section class="tarjeta">
+    <h2 class="tarjeta-encabezado">Tu día hasta ahora</h2>
+    <ul class="lista-fichas">${filas.map((f) => f.html).join('')}</ul>
+  </section>`;
+}
+
 function bloquePendientes(pendientes) {
-  const nombres = { glucosa: 'glucómetro', presion: 'tensiómetro', ejercicio: 'ejercicio' };
+  const nombres = {
+    glucosa: 'glucómetro', presion: 'tensiómetro',
+    ejercicio: 'ejercicio', medicamentos: 'medicación',
+  };
+  const rutas = {
+    glucosa: '/glucosa', presion: '/presion',
+    ejercicio: '/calendario', medicamentos: '/medicamentos',
+  };
   return `<section class="alerta alerta-atencion pendientes" role="alert">
-    <strong>Te faltan controles de hoy</strong>
+    <strong>Te falta algo de hoy</strong>
     <ul>
       ${pendientes.map(({ recordatorio, objetivo }) => `
         <li>
-          <a href="#/${recordatorio.tipo === 'ejercicio' ? 'calendario' : recordatorio.tipo}">
+          <a href="#${rutas[recordatorio.tipo] || '/inicio'}">
             ${esc(recordatorio.etiqueta)} — estaba previsto a las ${esc(fmtHora(objetivo.getTime()))}
-            <small>(${esc(nombres[recordatorio.tipo])})</small>
+            <small>(${esc(nombres[recordatorio.tipo] || '')})</small>
           </a>
         </li>`).join('')}
     </ul>

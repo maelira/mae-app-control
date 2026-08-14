@@ -243,8 +243,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 /* --- Formularios ---------------------------------------------------------- */
 
 .formulario { display: grid; gap: 14px; }
+.formulario > * { min-width: 0; }
 
-.campo { display: grid; gap: 6px; }
+.campo { display: grid; gap: 6px; min-width: 0; }
 .campo > span {
   font-size: 0.85rem;
   font-weight: 600;
@@ -263,6 +264,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   border-radius: var(--radio-chico);
   padding: 13px 12px;
   min-height: 48px;
+  min-width: 0;
   appearance: none;
 }
 
@@ -293,7 +295,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .campo-fila {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -386,15 +388,15 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .accesos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
 .acceso {
   display: grid;
   justify-items: center;
-  gap: 8px;
-  padding: 16px 8px;
+  gap: 6px;
+  padding: 14px 6px;
   border-radius: var(--radio);
   background: var(--superficie);
   border: 1px solid var(--borde);
@@ -407,13 +409,108 @@ ul { margin: 0; padding: 0; list-style: none; }
   line-height: 1.25;
 }
 .acceso:active { background: var(--superficie-2); }
-.acceso-icono { font-size: 26px; }
+.acceso-icono { font-size: 24px; }
+
+/* --- Menú "Más" ----------------------------------------------------------- */
+
+.lista-secciones { padding: 4px 16px; }
+
+.seccion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--borde);
+  text-decoration: none;
+  color: var(--tinta);
+}
+.seccion:last-child { border-bottom: none; }
+.seccion:active { background: var(--superficie-2); }
+
+.seccion-icono {
+  display: grid;
+  place-items: center;
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  font-size: 20px;
+  flex: none;
+}
+.seccion-texto { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.seccion-titulo { font-weight: 650; font-size: 0.98rem; }
+.seccion-descripcion { font-size: 0.8rem; color: var(--tinta-2); }
+.seccion-contador {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--acento);
+  background: var(--acento-suave);
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.seccion-flecha { color: var(--tinta-3); font-size: 22px; flex: none; }
+
+/* --- Chips de selección rápida -------------------------------------------- */
+
+.chips-rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  cursor: pointer;
+  text-align: left;
+}
+.chip:active { filter: brightness(0.95); }
+.chip.activo {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #fff;
+}
+.chips-sintomas { margin-bottom: 4px; }
+
+.lista-sensaciones { display: grid; gap: 14px; }
+.lista-sensaciones li {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--borde);
+}
+.lista-sensaciones li:last-child { border-bottom: none; padding-bottom: 0; }
+.sensacion-hora { color: var(--tinta-3); font-size: 0.82rem; margin-left: 8px; }
+.botones-sensacion { display: flex; flex-wrap: wrap; gap: 6px; }
+.botones-sensacion .chip { font-size: 0.78rem; min-height: 36px; padding: 6px 12px; }
+
+.lista-frecuentes { display: grid; gap: 2px; }
+.lista-frecuentes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 0.9rem;
+}
+.lista-frecuentes li:last-child { border-bottom: none; }
+.lista-frecuentes b { font-variant-numeric: tabular-nums; color: var(--tinta-2); }
+
+.acciones-alerta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
+.acciones-alerta .enlace-bloque { margin-top: 0; }
 
 /* --- Tarjetas de datos ---------------------------------------------------- */
 
 .rejilla-datos {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -441,6 +538,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-weight: 680;
   letter-spacing: -0.02em;
   margin-top: 2px;
+  overflow-wrap: anywhere;
 }
 .tarjeta-valor small {
   font-size: 0.72rem;
@@ -448,6 +546,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   color: var(--tinta-3);
   margin-left: 4px;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 .tarjeta-pie {
   font-size: 0.78rem;
@@ -502,6 +601,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .insignia i { font-style: normal; font-size: 0.8em; flex: none; }
 
+.nivel-neutro    { background: var(--superficie-2);   color: var(--tinta-2); }
 .nivel-bien      { background: var(--bien-fondo);     color: var(--tinta); border-color: color-mix(in srgb, var(--bien) 35%, transparent); }
 .nivel-atencion  { background: var(--atencion-fondo); color: var(--tinta); border-color: color-mix(in srgb, var(--atencion) 45%, transparent); }
 .nivel-serio     { background: var(--serio-fondo);    color: var(--tinta); border-color: color-mix(in srgb, var(--serio) 45%, transparent); }
@@ -544,6 +644,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-size: 1.15rem;
   font-weight: 680;
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 .ficha-valor-texto { font-size: 1rem; }
 .ficha-valor small {
@@ -551,6 +652,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-weight: 600;
   color: var(--tinta-3);
   margin-left: 4px;
+  white-space: nowrap;
 }
 .ficha-meta {
   font-size: 0.82rem;
@@ -582,7 +684,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .calendario-semana,
 .calendario-rejilla {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -600,9 +702,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   align-content: center;
   justify-items: center;
   gap: 3px;
-  aspect-ratio: 1 / 1;
-  min-height: 42px;
-  padding: 2px;
+  min-height: 46px;
+  padding: 4px 2px;
   border: 1px solid transparent;
   border-radius: var(--radio-chico);
   background: var(--superficie-2);
@@ -630,6 +731,18 @@ ul { margin: 0; padding: 0; list-style: none; }
 .punto-presion   { background: var(--serie-2); }
 .punto-ejercicio { background: var(--serie-3); }
 .celda.seleccionada .punto { box-shadow: 0 0 0 1.5px var(--acento); }
+
+/* Los síntomas se distinguen por forma, no por un color más:
+   con seis tipos de registro, seis tonos ya no serían distinguibles. */
+.marca-sintoma {
+  font-style: normal;
+  font-size: 7px;
+  line-height: 1;
+  color: var(--critico);
+}
+.celda.seleccionada .marca-sintoma { color: #fff; }
+.calendario-leyenda .marca-sintoma { font-size: 9px; }
+.ayuda-calendario { margin: 0 0 12px; }
 
 .calendario-leyenda {
   display: flex;
@@ -712,7 +825,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .interruptor input:checked + span::before { transform: translateX(18px); }
 .interruptor input:focus-visible + span { outline: 2px solid var(--acento); outline-offset: 2px; }
 
-.selector-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.selector-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
 .dia-boton {
   font: inherit;
   font-size: 0.72rem;
@@ -823,7 +936,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   left: 0; right: 0; bottom: 0;
   z-index: 40;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 2px;
   padding: 6px 4px calc(env(safe-area-inset-bottom) + 6px);
   background: color-mix(in srgb, var(--superficie) 92%, transparent);

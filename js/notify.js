@@ -14,12 +14,6 @@ import { claveDia, claveHora, DIAS_CORTOS } from './utils.js';
 const VENTANA_AVISO_MS = 3 * 60 * 60 * 1000;
 const INTERVALO_REVISION_MS = 30 * 1000;
 
-const ICONOS = {
-  glucosa: './icons/icon-192.png',
-  presion: './icons/icon-192.png',
-  ejercicio: './icons/icon-192.png',
-};
-
 const TEXTOS = {
   glucosa: {
     titulo: 'Control de glucemia',
@@ -33,6 +27,18 @@ const TEXTOS = {
     titulo: 'Momento de moverte',
     cuerpo: 'Tenés programada tu actividad física.',
   },
+  medicamentos: {
+    titulo: 'Hora de tu medicación',
+    cuerpo: 'Te toca tomar tu medicamento. Acordate de registrarlo después.',
+  },
+};
+
+/** Colección donde se busca el registro que "cumple" cada recordatorio. */
+const COLECCION_POR_TIPO = {
+  glucosa: 'glucosa',
+  presion: 'presion',
+  ejercicio: 'ejercicio',
+  medicamentos: 'medicamentos',
 };
 
 let temporizador = null;
@@ -150,7 +156,7 @@ export function pendientesDeHoy(ahora = new Date()) {
   for (const rec of estado.recordatorios) {
     const objetivo = horaDeHoy(rec, ahora);
     if (!objetivo || ahora < objetivo) continue;
-    const registros = delDia[rec.tipo] || [];
+    const registros = delDia[COLECCION_POR_TIPO[rec.tipo]] || [];
     const hayRegistroPosterior = registros.some((r) => r.ts >= objetivo.getTime() - 30 * 60 * 1000);
     if (!hayRegistroPosterior) {
       pendientes.push({ recordatorio: rec, objetivo, minutosDeRetraso: Math.floor((ahora - objetivo) / 60000) });
@@ -173,7 +179,7 @@ export async function revisarAhora() {
     if (store.yaDisparado(rec.id, hoy)) continue;
 
     // Si ya hay un registro de ese tipo después de la hora prevista, no hace falta avisar.
-    const registros = store.registrosDelDia(hoy)[rec.tipo] || [];
+    const registros = store.registrosDelDia(hoy)[COLECCION_POR_TIPO[rec.tipo]] || [];
     if (registros.some((r) => r.ts >= objetivo.getTime() - 30 * 60 * 1000)) {
       store.marcarDisparado(rec.id, hoy);
       continue;
@@ -183,7 +189,6 @@ export async function revisarAhora() {
     await notificar(rec.etiqueta || texto.titulo, {
       body: texto.cuerpo,
       tag: `recordatorio-${rec.id}-${hoy}`,
-      icon: ICONOS[rec.tipo],
       data: { tipo: rec.tipo, url: `./?accion=registrar&tipo=${rec.tipo}` },
     });
     if (document.visibilityState === 'visible') sonarAviso();
