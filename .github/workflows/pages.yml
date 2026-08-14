@@ -2,7 +2,9 @@ name: Publicar en GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - claude/health-tracking-mobile-app-9te0yr
   workflow_dispatch:
 
 permissions:
