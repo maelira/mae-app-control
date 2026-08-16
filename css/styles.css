@@ -81,6 +81,10 @@
 
 * { box-sizing: border-box; }
 
+/* El atributo hidden debe ganarle al display de cualquier componente:
+   sin esto, una regla como "display: flex" deja visible un elemento oculto. */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {

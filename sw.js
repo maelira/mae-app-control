@@ -1,6 +1,6 @@
 // Service worker: permite usar la app sin internet y mostrar las notificaciones.
 
-const VERSION = 'control-salud-v2';
+const VERSION = 'control-salud-v3';
 const RECURSOS = [
   './',
   './index.html',

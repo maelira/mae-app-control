@@ -87,9 +87,25 @@ function prepararInstalacion() {
   const botonCerrar = document.getElementById('cerrar-instalar');
   let evento = null;
 
-  const yaInstalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  if (yaInstalada || localStorage.getItem('instalar-oculto') === '1') return;
+  const ocultar = (recordar) => {
+    barra.hidden = true;
+    if (recordar) localStorage.setItem('instalar-oculto', '1');
+  };
 
+  // El botón de cerrar se conecta siempre, incluso si la barra no llegara a
+  // mostrarse: si no, en la app ya instalada la X no tendría nada que la escuche.
+  botonCerrar.addEventListener('click', () => ocultar(true));
+
+  const yaInstalada = window.matchMedia('(display-mode: standalone)').matches
+    || window.matchMedia('(display-mode: minimal-ui)').matches
+    || navigator.standalone === true;
+
+  if (yaInstalada || localStorage.getItem('instalar-oculto') === '1') {
+    ocultar(false);
+    return;
+  }
+
+  // Sólo se ofrece instalar cuando el navegador confirma que se puede.
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     evento = e;
@@ -101,17 +117,12 @@ function prepararInstalacion() {
     evento.prompt();
     const { outcome } = await evento.userChoice;
     evento = null;
-    barra.hidden = true;
+    ocultar(outcome === 'accepted');
     if (outcome === 'accepted') aviso('¡Listo! Buscá el ícono en tu pantalla de inicio.');
   });
 
-  botonCerrar.addEventListener('click', () => {
-    barra.hidden = true;
-    localStorage.setItem('instalar-oculto', '1');
-  });
-
   window.addEventListener('appinstalled', () => {
-    barra.hidden = true;
+    ocultar(true);
     aviso('App instalada');
   });
 }
